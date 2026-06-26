@@ -1,9 +1,4 @@
-node_modules/
 .env
-database.sqlite
-backend/uploads/*
-!backend/uploads/.gitkeep
+*.sqlite
+node_modules/
 venv/
-*.log
-.DS_Store
-data/*.csv
