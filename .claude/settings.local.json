@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm start *)",
+      "Bash(kill -9 75314)",
+      "Bash(rm -rf frontend/dashboard.html)",
+      "Bash(node -c backend/server.js)",
+      "Bash(node -c backend/controllers/importAlunosController.js)",
+      "Bash(node -c backend/routes/importarAlunos.js)",
+      "Bash(node *)"
+    ],
+    "additionalDirectories": [
+      "/home/canc90/teste/frontend/dashboard.html"
+    ]
+  }
+}
