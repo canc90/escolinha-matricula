@@ -6,3 +6,4 @@ backend/uploads/*
 venv/
 *.log
 .DS_Store
+data/*.csv
