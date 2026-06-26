@@ -1,4 +1,0 @@
-.env
-*.sqlite
-node_modules/
-venv/
