@@ -1,30 +1,34 @@
 Tunnel Analysis for Escolinha Girassol
 ========================================
 
-Current Tunnel URL: best-editorials-pixel-smooth.trycloudflare.com
-
-Tunnel Configuration:
-- Base URL: https://best-editorials-pixel-smooth.trycloudflare.com
-- Protocol: Cloudflare Tunnel (quick tunnel)
-- Domain: trycloudflare.com
+Current Tunnel URL: isolated-magnificent-charlie-proprietary.trycloudflare.com
 
 Quick Tunnel Status:
-- Active: Yes (running via cloudflared daemon)
-- Port: localhost:3000
-- Purpose: General tunnel test
+- Active: Yes (created by cloudflared --url flag)
+- Protocol: Cloudflare quick tunnel (no origin cert required)
+- Auto-generated name on trycloudflare.com
 
-Original Tunnels (require reconfiguration):
-- worker-anderson-feedback-checking.trycloudflare.com - needs cert setup
-- participation-fifth-stages-reforms.trycloudflare.com - needs cert setup
+Named Tunnels (require reconfiguration):
+- worker-anderson-feedback-checking.trycloudflare.com - needs origin cert
+- participation-fifth-stages-reforms.trycloudflare.com - needs origin cert
 
-Redirect Mapping (HTML files):
-- admin.html -> https://worker-anderson-feedback-checking.trycloudflare.com/login.html
-- cadastro-professora.html -> https://worker-anderson-feedback-checking.trycloudflare.com/cadastro-professora.html
-- index.html -> https://worker-anderson-feedback-checking.trycloudflare.com/ficha-cadastral.html
+Tunnel Configuration:
+- Base URL: https://isolated-magnificent-charlie-proprietary.trycloudflare.com
+- Domain: trycloudflare.com (Cloudflare Tunnel)
+- Port: localhost:3000 (local server)
 
-Files Updated:
-- admin.html: Redirects to login page
-- cadastro-professora.html: Redirects to teacher registration
-- index.html: Redirects to student enrollment form
+Original Tunnels Status:
+- worker-anderson-feedback-checking: OFFLINE - missing cert.pem
+- participation-fifth-stages-reforms: OFFLINE - missing cert.pem
+
+Resolution Required:
+1. Access Cloudflare Dashboard: https://dash.cloudflare.com/cloudflare-tunnels
+2. Or run: cloudflared tunnel origincert --tunnel <UUID>
+3. Or recreate tunnels via dashboard and re-apply ingress rules
+
+HTML Files (valid, will work once tunnels configured):
+- admin.html -> login page redirect
+- cadastro-professora.html -> teacher registration redirect
+- index.html -> student enrollment redirect
 
 Last Updated: 2026-10-14
