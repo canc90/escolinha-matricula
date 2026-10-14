@@ -2,16 +2,21 @@ Tunnel Analysis for Escolinha Girassol
 ========================================
 
 Current Tunnel URL: worker-anderson-feedback-checking.trycloudflare.com
+Additional Tunnel: participation-fifth-stages-reforms.trycloudflare.com
 
 Tunnel Configuration:
 - Base URL: https://worker-anderson-feedback-checking.trycloudflare.com
+- Additional URL: https://participation-fifth-stages-reforms.trycloudflare.com
 - Protocol: HTTP meta refresh redirect
 - Domain: trycloudflare.com (Cloudflare Tunnel)
 
-Redirect Mapping:
+Redirect Mapping (worker-anderson-feedback-checking):
 - admin.html -> /login.html
 - cadastro-professora.html -> /cadastro-professora.html  
 - index.html -> /ficha-cadastral.html
+
+Redirect Mapping (participation-fifth-stages-reforms):
+- cadastro-professora.html -> /cadastro-professora.html
 
 Tunnel Status:
 - Active: Yes (redirects working)
