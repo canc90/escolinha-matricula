@@ -1,0 +1,26 @@
+Tunnel Analysis for Escolinha Girassol
+========================================
+
+Current Tunnel URL: worker-anderson-feedback-checking.trycloudflare.com
+
+Tunnel Configuration:
+- Base URL: https://worker-anderson-feedback-checking.trycloudflare.com
+- Protocol: HTTP meta refresh redirect
+- Domain: trycloudflare.com (Cloudflare Tunnel)
+
+Redirect Mapping:
+- admin.html -> /login.html
+- cadastro-professora.html -> /cadastro-professora.html  
+- index.html -> /ficha-cadastral.html
+
+Tunnel Status:
+- Active: Yes (redirects working)
+- Purpose: School management system access
+- Users: Students, teachers, administrators
+
+Files Updated:
+- admin.html: Redirects to login page
+- cadastro-professora.html: Redirects to teacher registration
+- index.html: Redirects to student enrollment form
+
+Last Updated: 2026-10-14
