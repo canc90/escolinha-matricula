@@ -1,0 +1,38 @@
+services:
+  app:
+    build: .
+    user: "1000:1000"
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ../backend/database:/old-db:ro
+      - ../backend/uploads:/old-uploads:ro
+    ports:
+      - "8000:8000"
+    environment:
+      HOME: /tmp
+      COMPOSER_HOME: /tmp/composer
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: escola
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: escola
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  mysql-data:
