@@ -1,0 +1,76 @@
+# Produção — imagem imutável (php-fpm + nginx), MySQL sem porta exposta,
+# fila e agendador como serviços separados.
+#
+# Uso:
+#   cp .env.production.example .env.production
+#   docker compose --env-file .env.production -f docker-compose.prod.yml build
+#   docker compose --env-file .env.production -f docker-compose.prod.yml up -d
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: escola-app:prod
+    restart: unless-stopped
+    env_file: .env.production
+    ports:
+      - "8080:80"
+    volumes:
+      - app-storage:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/up') ? 0 : 1);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  queue:
+    image: escola-app:prod
+    restart: unless-stopped
+    env_file: .env.production
+    user: "www-data"
+    working_dir: /var/www/html
+    command: php artisan queue:work --sleep=1 --tries=3 --timeout=120
+    volumes:
+      - app-storage:/var/www/html/storage
+    depends_on:
+      app:
+        condition: service_healthy
+
+  scheduler:
+    image: escola-app:prod
+    restart: unless-stopped
+    env_file: .env.production
+    user: "www-data"
+    working_dir: /var/www/html
+    command: php artisan schedule:work
+    volumes:
+      - app-storage:/var/www/html/storage
+    depends_on:
+      app:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-escola}
+      MYSQL_USER: ${DB_USERNAME:-escola}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env.production}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?defina DB_ROOT_PASSWORD no .env.production}
+    # Porta nao exposta ao host: acesso apenas pela rede interna do compose.
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  mysql-data:
+  app-storage:

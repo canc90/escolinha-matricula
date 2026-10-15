@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,8 +16,21 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureRole::class,
+            'role' => EnsureRole::class,
         ]);
+
+        // Cabeçalhos de segurança em toda resposta.
+        $middleware->append(SecurityHeaders::class);
+
+        // Limite de requisições padrão (60/min) para toda a API.
+        $middleware->throttleApi();
+
+        // Confia nos proxies (túnel/Cloudflare) para gerar URLs e detectar HTTPS.
+        $proxies = env('TRUSTED_PROXIES');
+
+        if (! empty($proxies)) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : explode(',', $proxies));
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

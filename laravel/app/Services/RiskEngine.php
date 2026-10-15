@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Aluno;
 use App\Models\Alert;
 use App\Models\Turma;
 use Illuminate\Support\Facades\DB;

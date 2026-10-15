@@ -36,6 +36,7 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('frequencias.index') }}"><i class="bi bi-check2-square"></i> Frequências</a></li>
                 @if (auth()->user()->isAdmin())
                     <li class="nav-item"><a class="nav-link" href="{{ route('importacao') }}"><i class="bi bi-upload"></i> Importação</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('api.tester') }}"><i class="bi bi-plug"></i> Testar API</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('ia') }}"><i class="bi bi-robot"></i> IA</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('direcao') }}"><i class="bi bi-bar-chart"></i> Direção</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('users.index') }}"><i class="bi bi-gear"></i> Usuários</a></li>

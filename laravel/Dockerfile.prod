@@ -1,0 +1,90 @@
+# syntax=docker/dockerfile:1
+
+# ---------------------------------------------------------------------------
+# Estágio 1 — dependências PHP (sem pacotes de desenvolvimento)
+# ---------------------------------------------------------------------------
+FROM composer:2 AS vendor
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+
+RUN composer install \
+        --no-dev \
+        --no-interaction \
+        --no-progress \
+        --prefer-dist \
+        --optimize-autoloader \
+        --no-scripts
+
+# ---------------------------------------------------------------------------
+# Estágio 2 — aplicação (php-fpm + nginx no mesmo container)
+# ---------------------------------------------------------------------------
+FROM php:8.4-fpm-bookworm AS app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        nginx \
+        libzip-dev \
+        libpng-dev \
+        libjpeg62-turbo-dev \
+        libfreetype6-dev \
+        libonig-dev \
+        libxml2-dev \
+        libicu-dev \
+        default-mysql-client \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" \
+        pdo_mysql \
+        mbstring \
+        zip \
+        bcmath \
+        gd \
+        intl \
+        exif \
+        pcntl \
+        opcache \
+    && rm -f /etc/nginx/sites-enabled/default \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Opcache + limites de upload/memória para produção.
+RUN printf '%s\n' \
+    'opcache.enable=1' \
+    'opcache.validate_timestamps=0' \
+    'opcache.memory_consumption=192' \
+    'opcache.interned_strings_buffer=16' \
+    'opcache.max_accelerated_files=20000' \
+    'opcache.jit=tracing' \
+    'opcache.jit_buffer_size=64M' \
+    'memory_limit=512M' \
+    'upload_max_filesize=10M' \
+    'post_max_size=12M' \
+    'max_execution_time=60' \
+    'expose_php=0' \
+    > /usr/local/etc/php/conf.d/zz-app.ini
+
+WORKDIR /var/www/html
+
+COPY --from=vendor /app/vendor ./vendor
+COPY . .
+
+# Diretórios de runtime, link do storage e permissões.
+RUN mkdir -p \
+        storage/app/private \
+        storage/app/public \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache \
+    && ln -sfn /var/www/html/storage/app/public public/storage \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+COPY docker/nginx.conf /etc/nginx/conf.d/app.conf
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+EXPOSE 80
+
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["serve"]

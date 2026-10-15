@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\RelatorioController;
 use App\Livewire\Alunos\AlunoForm;
 use App\Livewire\Alunos\AlunoShow;
 use App\Livewire\Alunos\AlunosIndex;
+use App\Livewire\ApiTester;
 use App\Livewire\Auth\Login;
 use App\Livewire\Dashboard;
 use App\Livewire\DashboardPedagogico;
@@ -19,20 +21,13 @@ use App\Livewire\Turmas\TurmaForm;
 use App\Livewire\Turmas\TurmasIndex;
 use App\Livewire\Users\UserForm;
 use App\Livewire\Users\UsersIndex;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route('login'));
+Route::redirect('/', '/login');
 
 Route::get('/login', Login::class)->name('login')->middleware('guest');
 
-Route::post('/logout', function () {
-    Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-
-    return redirect()->route('login');
-})->name('logout');
+Route::post('/logout', LogoutController::class)->name('logout');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
@@ -69,6 +64,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/direcao', Direcao::class)->name('direcao');
         Route::get('/ia-educacional', IaEducacional::class)->name('ia');
         Route::get('/importacao', Importacao::class)->name('importacao');
+        Route::get('/api-tester', ApiTester::class)->name('api.tester');
 
         Route::get('/users', UsersIndex::class)->name('users.index');
         Route::get('/users/novo', UserForm::class)->name('users.create');
