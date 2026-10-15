@@ -1,0 +1,22 @@
+[
+  {
+    "timestamp": "2026-06-11T04:07:25.272Z",
+    "usuario": 1,
+    "arquivo": "1781150845253-_BDEG_Alunos.csv",
+    "totalLido": 53,
+    "totalImportado": 0,
+    "totalDuplicados": 53,
+    "totalInvalidos": 0,
+    "erros": []
+  },
+  {
+    "timestamp": "2026-06-11T04:00:42.230Z",
+    "usuario": 1,
+    "arquivo": "1781150442205-BDEG.csv",
+    "totalLido": 53,
+    "totalImportado": 1,
+    "totalDuplicados": 52,
+    "totalInvalidos": 0,
+    "erros": []
+  }
+]

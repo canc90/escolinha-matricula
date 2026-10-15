@@ -1,0 +1,13 @@
+# Dependências
+node_modules
+venv/
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Configurações locais de ferramentas
+.claude/settings.local.json
+.DS_Store
+Thumbs.db
