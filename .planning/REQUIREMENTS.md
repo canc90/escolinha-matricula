@@ -60,23 +60,23 @@ Quais fases cobrem quais requisitos. Preenchido durante a criação do roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BACKUP-01 | — | Pending |
-| BACKUP-02 | — | Pending |
-| BACKUP-03 | — | Pending |
-| OBS-01 | — | Pending |
-| OBS-02 | — | Pending |
-| SEC-01 | — | Pending |
-| QUAL-01 | — | Pending |
-| QUAL-02 | — | Pending |
-| LEGACY-01 | — | Pending |
-| LEGACY-02 | — | Pending |
+| BACKUP-01 | Phase 1 | Pending |
+| BACKUP-02 | Phase 1 | Pending |
+| BACKUP-03 | Phase 1 | Pending |
+| OBS-01 | Phase 2 | Pending |
+| OBS-02 | Phase 2 | Pending |
+| SEC-01 | Phase 3 | Pending |
+| QUAL-01 | Phase 4 | Pending |
+| QUAL-02 | Phase 4 | Pending |
+| LEGACY-01 | Phase 5 | Pending |
+| LEGACY-02 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10 ⚠️ (a definir na criação do roadmap)
+- Mapped to phases: 10 ✓
+- Unmapped: 0
 
 ---
 
 *Requirements defined: 2026-10-16*
-*Last updated: 2026-10-16 after initial definition*
+*Last updated: 2026-10-16 after roadmap creation (traceability filled)*
