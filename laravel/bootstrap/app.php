@@ -25,12 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Limite de requisições padrão (60/min) para toda a API.
         $middleware->throttleApi();
 
-        // Confia nos proxies (túnel/Cloudflare) para gerar URLs e detectar HTTPS.
-        $proxies = env('TRUSTED_PROXIES');
-
-        if (! empty($proxies)) {
-            $middleware->trustProxies(at: $proxies === '*' ? '*' : explode(',', $proxies));
-        }
+        // Obs.: os proxies confiáveis são configurados em AppServiceProvider::boot()
+        // a partir de config('app.trusted_proxies'). Não use env() aqui: este
+        // closure roda quando o HttpKernel é resolvido, antes do .env ser lido.
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

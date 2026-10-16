@@ -56,6 +56,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Proxies Confiáveis
+    |--------------------------------------------------------------------------
+    |
+    | Quais proxies podem definir os cabeçalhos X-Forwarded-* (usados para
+    | detectar HTTPS e montar URLs corretas). Aceita "*" para confiar em
+    | qualquer proxy ou uma lista de IPs/CIDRs separados por vírgula. Vazio
+    | desativa a confiança nos cabeçalhos de proxy.
+    |
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
