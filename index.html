@@ -1,15 +1,208 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Matrícula - Escolinha Girassol</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistema de Gestão Escolar da Escolinha Girassol: alunos, professoras, turmas, diário de classe, frequências e relatórios.">
+  <meta name="theme-color" content="#4F46E5">
+  <title>Escolinha Girassol — Sistema de Gestão Escolar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #4F46E5;
+      --color-primary-strong: #4338CA;
+      --color-secondary: #818CF8;
+      --color-accent: #EA580C;
+      --color-background: #EEF2FF;
+      --color-foreground: #1E1B4B;
+      --color-card: #FFFFFF;
+      --color-muted: #EBEEF8;
+      --color-muted-foreground: #475569;
+      --color-border: #C7D2FE;
+      --font-heading: 'Baloo 2', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --font-body: 'Comic Neue', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --radius: 24px;
+      --shadow-md: 0 6px 16px rgba(79, 70, 229, 0.12);
+      --shadow-lg: 0 14px 34px rgba(79, 70, 229, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--color-foreground);
+      background:
+        radial-gradient(1100px 520px at 80% -10%, rgba(129, 140, 248, 0.35), transparent 60%),
+        radial-gradient(900px 480px at -10% 10%, rgba(234, 88, 12, 0.12), transparent 55%),
+        var(--color-background);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3 { font-family: var(--font-heading); line-height: 1.2; margin: 0 0 .5rem; }
+
+    a { color: var(--color-primary); }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; }
+
+    /* Cabeçalho */
+    header.nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: .6rem; font-family: var(--font-heading); font-weight: 700; font-size: 1.15rem; }
+    .brand .logo {
+      display: grid; place-items: center;
+      width: 42px; height: 42px; border-radius: 14px;
+      background: var(--color-primary); color: #fff; font-size: 1.4rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Botões */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+      padding: .7rem 1.4rem; border: none; border-radius: 999px; cursor: pointer;
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
+      text-decoration: none;
+      transition: transform .18s ease, box-shadow .18s ease, background .15s ease;
+    }
+    .btn:active { transform: translateY(1px) scale(.99); }
+    .btn:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+    .btn-primary { background: var(--color-primary); color: #fff; box-shadow: var(--shadow-md); }
+    .btn-primary:hover { background: var(--color-primary-strong); box-shadow: var(--shadow-lg); }
+    .btn-accent { background: var(--color-accent); color: #fff; box-shadow: var(--shadow-md); }
+    .btn-accent:hover { background: #C2410C; box-shadow: var(--shadow-lg); }
+    .btn-ghost { background: var(--color-muted); color: var(--color-foreground); }
+    .btn-ghost:hover { background: var(--color-border); }
+
+    /* Hero */
+    .hero { text-align: center; padding: 3.5rem 0 2.5rem; }
+    .hero .eyebrow {
+      display: inline-block; padding: .25rem .8rem; border-radius: 999px;
+      background: var(--color-card); border: 1px solid var(--color-border);
+      color: var(--color-muted-foreground); font-weight: 700; font-size: .8rem;
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); margin: 1rem 0 .75rem; }
+    .hero p.lead { max-width: 620px; margin: 0 auto 1.75rem; font-size: 1.1rem; color: var(--color-muted-foreground); }
+    .hero .actions { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+
+    /* Seções */
+    section { margin-top: 3.5rem; }
+    section > h2 { font-size: 1.6rem; text-align: center; margin-bottom: 1.5rem; }
+
+    .grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+
+    .card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      box-shadow: var(--shadow-md);
+    }
+    .card .icon {
+      display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px;
+      background: var(--color-muted); font-size: 1.4rem; margin-bottom: .75rem;
+    }
+    .card h3 { font-size: 1.1rem; }
+    .card p { margin: 0; color: var(--color-muted-foreground); font-size: .95rem; }
+
+    /* Aviso de acesso */
+    .notice {
+      margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: 16px;
+      background: rgba(79, 70, 229, 0.08);
+      border: 1px dashed var(--color-border);
+      color: var(--color-muted-foreground);
+      font-size: .95rem;
+    }
+    .notice code { background: var(--color-muted); padding: .1rem .4rem; border-radius: 6px; }
+
+    footer { margin-top: 3.5rem; text-align: center; color: var(--color-muted-foreground); font-size: .9rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Escolinha Girassol - Sistema de Matrícula</h1>
-  <p>Sistema de gestão escolar (Laravel) em execução.</p>
-  <ul>
-    <li>Cloudflare Tunnel URL: <a href="https://sublime-theater-pics-publications.trycloudflare.com">https://sublime-theater-pics-publications.trycloudflare.com</a></li>
-    <li>Acesso local: <a href="http://localhost:8000">http://localhost:8000</a></li>
-  </ul>
+  <div class="wrap">
+    <header class="nav">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">🌻</span>
+        <span>Escolinha Girassol</span>
+      </div>
+      <!-- CTA principal. Aponta para /login na mesma origem do sistema.
+           Para apontar para um endereço público (ex.: Cloudflare Tunnel),
+           troque o href abaixo pela URL correspondente. -->
+      <a class="btn btn-primary" href="/login">Entrar no sistema</a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <span class="eyebrow">Sistema de Gestão Escolar</span>
+        <h1>Tudo da escolinha, em um só lugar</h1>
+        <p class="lead">
+          Cadastro de alunos e professoras, turmas, diário de classe, frequências,
+          relatórios em PDF/CSV e indicadores — de forma simples e segura.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="/login">Entrar no sistema</a>
+          <a class="btn btn-ghost" href="http://localhost:8000" rel="noopener">Acesso local (localhost:8000)</a>
+        </div>
+
+        <div class="notice">
+          O sistema roda no endereço da aplicação. Se você abriu esta página localmente,
+          use <code>http://localhost:8000</code>. Atrás de um túnel/proxy, use <code>/login</code>
+          no mesmo endereço da página.
+        </div>
+      </section>
+
+      <section aria-labelledby="recursos">
+        <h2 id="recursos">O que o sistema faz</h2>
+        <div class="grid">
+          <div class="card">
+            <div class="icon" aria-hidden="true">🧒</div>
+            <h3>Alunos</h3>
+            <p>Ficha completa, foto e documento, alergias, contatos e responsáveis.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">👩‍🏫</div>
+            <h3>Professoras</h3>
+            <p>Cadastro e vínculo com as turmas em que atuam.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🏫</div>
+            <h3>Turmas</h3>
+            <p>Organização das turmas por turno, com lista de alunos.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">📓</div>
+            <h3>Diário de classe</h3>
+            <p>Registro das aulas e atividades do dia a dia.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">✅</div>
+            <h3>Frequências</h3>
+            <p>Chamada e acompanhamento de presença, com alertas automáticos.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">📊</div>
+            <h3>Relatórios e indicadores</h3>
+            <p>Relatórios em PDF/CSV e painéis pedagógicos.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Escolinha Girassol · Sistema de Gestão Escolar</p>
+    </footer>
+  </div>
 </body>
 </html>

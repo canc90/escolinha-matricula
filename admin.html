@@ -1,15 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Escolinha Girassol</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo — Escolinha Girassol</title>
+  <meta name="robots" content="noindex">
+  <!-- Redireciona para a área administrativa do sistema. Se não houver sessão,
+       o próprio sistema envia para a tela de login. -->
+  <meta http-equiv="refresh" content="0; url=/direcao">
+  <script>location.replace('/direcao');</script>
+  <style>
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: #EEF2FF; color: #1E1B4B; text-align: center; padding: 1.5rem;
+    }
+    a { color: #4F46E5; font-weight: 600; }
+    p { color: #475569; }
+  </style>
 </head>
 <body>
-  <h1>Painel Administrativo - Escolinha Girassol</h1>
-  <p>Sistema de gestão escolar (Laravel) em execução.</p>
-  <ul>
-    <li>Cloudflare Tunnel URL: <a href="https://sublime-theater-pics-publications.trycloudflare.com">https://sublime-theater-pics-publications.trycloudflare.com</a></li>
-    <li>Acesso local: <a href="http://localhost:8000">http://localhost:8000</a></li>
-  </ul>
+  <main>
+    <h1>Painel Administrativo</h1>
+    <p>Redirecionando para o sistema…</p>
+    <p>Se não for redirecionado automaticamente, <a href="/direcao">clique aqui</a>.</p>
+  </main>
 </body>
 </html>
