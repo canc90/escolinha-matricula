@@ -1,5 +1,11 @@
+# Sistema ANTIGO (Node/Express + SQLite) — DESATIVADO.
+# Foi substituído pela versão Laravel em ./laravel (veja laravel/README.md),
+# que sobe com:  cd laravel && docker compose up -d
+# Para subir o antigo mesmo assim:
+#   docker compose --profile legacy up -d
 services:
   app:
+    profiles: ["legacy"]
     build: .
     ports:
       - "3000:3000"
