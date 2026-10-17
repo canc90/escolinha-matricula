@@ -40,7 +40,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: Comando `escola:backup` — dump compactado, uploads, retenção, agendamento diário e destino recuperável
+- [x] 01-01: Comando `escola:backup` — dump compactado, uploads, retenção, agendamento diário e destino recuperável
 - [ ] 01-02: Comando `escola:restore-backup` — guardas de segurança, suíte de testes e runbook em DEPLOY.md
 
 ### Phase 2: Observabilidade Operacional
