@@ -98,7 +98,14 @@ class Backup extends Command
      */
     protected function criarDiretorio(): string
     {
-        $base = (string) config('escola.backup.caminho');
+        // Sem a barra final: com ela, o caminho deste diretório sairia como
+        // ".../backups//backup-X" enquanto a listagem da poda devolve
+        // ".../backups/backup-X", e a proteção do backup corrente não casaria.
+        $base = rtrim((string) config('escola.backup.caminho'), '/\\');
+
+        if ($base === '') {
+            $base = (string) config('escola.backup.caminho');
+        }
 
         File::ensureDirectoryExists($base, 0750);
 
@@ -239,8 +246,8 @@ class Backup extends Command
 
             // A poda nunca toca no backup desta execução: mesmo com relógio
             // adiantado/atrasado entre a criação e a poda, o backup do dia é
-            // intocável.
-            if ($diretorio === $this->diretorioDaExecucao) {
+            // intocável. A comparação normaliza as barras dos dois lados.
+            if (rtrim($diretorio, '/\\') === rtrim((string) $this->diretorioDaExecucao, '/\\')) {
                 continue;
             }
 

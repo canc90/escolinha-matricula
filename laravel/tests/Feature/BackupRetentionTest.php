@@ -131,4 +131,39 @@ class BackupRetentionTest extends TestCase
         $this->assertCount(1, $novos, 'O backup desta execução não pode ser podado.');
         $this->assertDirectoryDoesNotExist($caminho.'/backup-2020-01-01_000000');
     }
+
+    public function test_a_poda_protege_o_backup_corrente_mesmo_com_barra_final_no_caminho(): void
+    {
+        Storage::fake('public');
+        $caminho = $this->prepararDiretorioDeBackup();
+        $this->dumperFalso();
+
+        // `BACKUP_PATH` configurado com barra final: sem a normalização, o
+        // diretório da execução sairia como ".../backups//backup-X" e não casaria
+        // com o caminho que a poda lista.
+        config(['escola.backup.caminho' => $caminho.'/']);
+
+        $this->app->bind(Backup::class, fn () => new class(app(DatabaseDumper::class), app(FileArchiver::class)) extends Backup
+        {
+            protected function aplicarRetencao(int $retencaoDias): int
+            {
+                Carbon::setTestNow(now()->addDays(2));
+
+                try {
+                    return parent::aplicarRetencao($retencaoDias);
+                } finally {
+                    Carbon::setTestNow();
+                }
+            }
+        });
+
+        $this->artisan('escola:backup', ['--retention-days' => 1])->assertSuccessful();
+
+        $novos = array_values(array_filter(
+            $this->diretoriosDeBackup($caminho),
+            fn (string $diretorio): bool => File::exists($diretorio.'/manifest.json'),
+        ));
+
+        $this->assertCount(1, $novos, 'O backup desta execução não pode ser podado.');
+    }
 }
