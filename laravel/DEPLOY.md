@@ -234,6 +234,63 @@ A cópia **off-site** (BACKUP-04, para um release futuro). Hoje o backup protege
 da aplicação e corrupção de dados, mas não contra a perda do servidor: enquanto não houver
 cópia externa, replique o diretório de backup para outro lugar periodicamente.
 
+## Observabilidade
+
+### Logs da aplicação
+
+**Onde ficam.** `storage/logs/laravel-AAAA-MM-DD.log` — um arquivo por dia — dentro do volume
+nomeado `app-storage`, montado em `/var/www/html/storage` nos serviços `app`, `queue` e
+`scheduler`: os três escrevem no **mesmo** diretório de logs. Por estarem dentro do volume, os
+logs **não aparecem no host** (diferente do backup, que é bind mount) e **não entram no backup**
+(fase 1, que cobre apenas banco e uploads). Se for preciso preservar logs antes de remover o
+volume, copie-os manualmente.
+
+**Rotação e retenção.** Os arquivos além de `LOG_DAILY_DAYS` dias (**14** por padrão) são
+removidos automaticamente. `LOG_DAILY_DAYS=0` **não** desliga a retenção — cai no padrão de 14
+(`max_files=0` no Monolog significaria "sem limite"). O valor é lido pela aplicação no boot:
+para mudar, altere o `.env.production` e recrie o container (`$P up -d`); com config em cache,
+rode antes `$P exec app php artisan optimize:clear`.
+
+**`LOG_LEVEL`.** Em produção mantenha `warning` (menos ruído e menos disco); `debug` só para
+investigar, voltando a `warning` depois.
+
+**Canal de alertas.** Existe também `storage/logs/alertas-AAAA-MM-DD.log`, com o nível **fixo**
+em `warning` (independente de `LOG_LEVEL`, para o alerta nunca ser engolido por um nível global
+mais alto) e a mesma retenção de `LOG_DAILY_DAYS`. Nele é gravado o fallback do alerta de erro
+5xx — detalhado na subseção seguinte.
+
+**Como ler** (o fuso do shell do container é UTC e o do app é `America/Sao_Paulo`; por isso os
+comandos leem o arquivo datado mais recente em vez de montar a data pelo shell, que divergiria
+do app entre 00:00 e 03:00 UTC):
+
+```sh
+P="docker compose -p escola-prod --env-file .env.production -f docker-compose.prod.yml"
+
+# Em produção (mesmo usuário dos comandos manuais de backup):
+$P exec -u www-data app sh -c 'ls -1 storage/logs; tail -n 200 "$(ls -1t storage/logs/laravel-*.log | head -1)"'
+
+# Em dev:
+docker compose exec app sh -c 'tail -n 200 "$(ls -1t storage/logs/laravel-*.log | head -1)"'
+```
+
+**Como conferir o disco** (a contagem deve ficar em torno de `LOG_DAILY_DAYS` por canal, mais o
+arquivo de deprecations, se algum dia for substituído o canal `null`):
+
+```sh
+$P exec -u www-data app du -sh storage/logs
+$P exec -u www-data app sh -c 'ls -1 storage/logs | wc -l'
+```
+
+**Como limpar manualmente** (apagar log apaga evidência: só depois de investigar):
+
+```sh
+$P exec -u www-data app sh -c 'rm -f storage/logs/laravel-*.log storage/logs/alertas-*.log'
+```
+
+**Dados sensíveis.** Mensagens de erro podem conter dados de alunos e professoras. A retenção
+de 14 dias limita a janela de exposição, os arquivos não são versionados (`*.log` no
+`.gitignore`) e o diretório não é servido pelo servidor web.
+
 ## Limitações conhecidas
 
 - Sem Content-Security-Policy: a interface usa CDNs e estilos/scripts inline; uma CSP

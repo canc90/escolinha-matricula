@@ -54,7 +54,11 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            // Rotação diária como padrão de CÓDIGO: um .env sem LOG_STACK (ex.:
+            // template antigo) gravaria um laravel.log único e sem limite, que é
+            // justamente o cenário que enche o disco. Com o default `daily`,
+            // o comportamento seguro é o padrão e o env só serve para trocar.
+            'channels' => explode(',', (string) env('LOG_STACK', 'daily')),
             'ignore_exceptions' => false,
         ],
 
@@ -69,7 +73,24 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'max_files' => env('LOG_DAILY_DAYS', 14),
+            // Retenção em dias, no estilo de BACKUP.retention_dias (config/escola.php):
+            // (a) LOG_DAILY_DAYS=0 desligaria a poda — max_files=0 significa "sem limite"
+            //     no RotatingFileHandler do Monolog, exatamente o que queremos evitar;
+            // (b) LOG_DAILY_DAYS= vazio no .env também cai no padrão de 14 dias.
+            'max_files' => (int) (env('LOG_DAILY_DAYS') ?: 14),
+            'replace_placeholders' => true,
+        ],
+
+        // Canal dedicado ao alerta de erro 5xx (ver plano 02-02). O level é FIXO
+        // em warning e NÃO usa LOG_LEVEL de propósito: se o ambiente subir o nível
+        // global para error, um alerta registrado em warning seria engolido em
+        // silêncio. Arquivo separado (alertas-AAAA-MM-DD.log) para o alerta ser
+        // fácil de achar; daily para herdar a mesma retenção de LOG_DAILY_DAYS.
+        'alertas' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/alertas.log'),
+            'level' => 'warning',
+            'max_files' => (int) (env('LOG_DAILY_DAYS') ?: 14),
             'replace_placeholders' => true,
         ],
 
