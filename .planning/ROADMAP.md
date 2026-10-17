@@ -41,7 +41,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01: Comando `escola:backup` — dump compactado, uploads, retenção, agendamento diário e destino recuperável
-- [ ] 01-02: Comando `escola:restore-backup` — guardas de segurança, suíte de testes e runbook em DEPLOY.md
+- [x] 01-02: Comando `escola:restore-backup` — guardas de segurança, suíte de testes e runbook em DEPLOY.md
 
 ### Phase 2: Observabilidade Operacional
 **Goal**: Quem opera o sistema enxerga o que está acontecendo: o disco não enche de log e uma falha em produção chega ao responsável sem depender de alguém abrir o servidor
