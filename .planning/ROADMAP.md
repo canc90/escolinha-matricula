@@ -37,7 +37,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Os arquivos enviados (fotos de alunos, documentos e fotos de professoras) também estão no backup diário
   3. Backups mais antigos que a retenção configurada são descartados, mantendo o disco sob controle
   4. Um backup pode ser restaurado (banco e uploads) seguindo a documentação, e essa restauração é verificada por teste automatizado
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01: Comando `escola:backup` — dump compactado, uploads, retenção, agendamento diário e destino recuperável
+- [ ] 01-02: Comando `escola:restore-backup` — guardas de segurança, suíte de testes e runbook em DEPLOY.md
 
 ### Phase 2: Observabilidade Operacional
 **Goal**: Quem opera o sistema enxerga o que está acontecendo: o disco não enche de log e uma falha em produção chega ao responsável sem depender de alguém abrir o servidor
@@ -95,7 +99,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backup e Restauração de Dados | 0/TBD | Not started | - |
+| 1. Backup e Restauração de Dados | 0/2 | In progress | - |
 | 2. Observabilidade Operacional | 0/TBD | Not started | - |
 | 3. Endurecimento de Segurança (CSP) | 0/TBD | Not started | - |
 | 4. Qualidade Automatizada com Análise Estática | 0/TBD | Not started | - |
