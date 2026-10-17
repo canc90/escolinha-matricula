@@ -56,7 +56,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: Logs com rotação diária e retenção de 14 dias (com poda real provada)
+- [x] 02-01: Logs com rotação diária e retenção de 14 dias (com poda real provada)
 - [ ] 02-02: Alerta de 5xx por webhook (`ALERT_WEBHOOK_URL`) com fallback no canal `alertas`, deduplicação e teto
 
 ### Phase 3: Endurecimento de Segurança (CSP)
