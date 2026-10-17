@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Console\Commands\Backup;
+use App\Contracts\DatabaseDumper;
+use App\Contracts\FileArchiver;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Tests\Feature\Concerns\UsaBackupDeTeste;
@@ -78,14 +82,53 @@ class BackupRetentionTest extends TestCase
         $this->assertDirectoryDoesNotExist($caminho.'/backup-2020-01-01_000000');
     }
 
-    public function test_retencao_negativa_e_recusada_sem_criar_backup(): void
+    public function test_retencao_zero_ou_negativa_e_recusada_sem_criar_backup(): void
     {
         Storage::fake('public');
         $caminho = $this->prepararDiretorioDeBackup();
         $this->dumperFalso();
 
-        $this->artisan('escola:backup', ['--retention-days' => -1])->assertFailed();
+        // Zero é recusado: "manter nada" apagaria o backup desta execução.
+        foreach ([0, -1] as $dias) {
+            $this->artisan('escola:backup', ['--retention-days' => $dias])->assertFailed();
 
-        $this->assertSame([], $this->diretoriosDeBackup($caminho));
+            $this->assertSame([], $this->diretoriosDeBackup($caminho));
+        }
+    }
+
+    public function test_a_poda_nunca_remove_o_backup_da_execucao_corrente(): void
+    {
+        Storage::fake('public');
+        $caminho = $this->prepararDiretorioDeBackup();
+        $this->dumperFalso();
+
+        // A retenção roda com o relógio 2 dias adiante: sem a proteção, o backup
+        // desta execução cairia fora da janela e seria apagado junto.
+        $this->app->bind(Backup::class, fn () => new class(app(DatabaseDumper::class), app(FileArchiver::class)) extends Backup
+        {
+            protected function aplicarRetencao(int $retencaoDias): int
+            {
+                Carbon::setTestNow(now()->addDays(2));
+
+                try {
+                    return parent::aplicarRetencao($retencaoDias);
+                } finally {
+                    Carbon::setTestNow();
+                }
+            }
+        });
+
+        File::ensureDirectoryExists($caminho.'/backup-2020-01-01_000000');
+        File::put($caminho.'/backup-2020-01-01_000000/qualquer.txt', 'x');
+
+        $this->artisan('escola:backup', ['--retention-days' => 1])->assertSuccessful();
+
+        $novos = array_values(array_filter(
+            $this->diretoriosDeBackup($caminho),
+            fn (string $diretorio): bool => File::exists($diretorio.'/manifest.json'),
+        ));
+
+        $this->assertCount(1, $novos, 'O backup desta execução não pode ser podado.');
+        $this->assertDirectoryDoesNotExist($caminho.'/backup-2020-01-01_000000');
     }
 }

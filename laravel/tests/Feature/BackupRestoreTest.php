@@ -138,11 +138,13 @@ class BackupRestoreTest extends TestCase
         $this->dumperFalso();
         $this->artisan('escola:backup')->assertSuccessful();
 
-        // Irmão com prefixo textual comum ao nome "backups": sem o separador
-        // final na comparação de contenção, ele passaria na checagem.
+        // Irmão com prefixo textual comum ao nome "backups", contendo uma CÓPIA
+        // do backup real — ou seja, um artefato válido (manifesto íntegro e
+        // coerente). Assim a única razão possível de recusa é a contenção do
+        // caminho: sem o separador final na comparação, ele passaria na
+        // checagem e seria restaurado.
         $irmao = dirname($caminho).'/backups-evil';
-        File::ensureDirectoryExists($irmao.'/backup-2020-01-01_000000');
-        File::put($irmao.'/backup-2020-01-01_000000/manifest.json', '{}');
+        File::copyDirectory($this->diretoriosDeBackup($caminho)[0], $irmao.'/backup-2020-01-01_000000');
 
         $this->assertRecusadoComFile('nao-existe');
         $this->assertRecusadoComFile($irmao);

@@ -24,6 +24,11 @@ class Backup extends Command
 
     protected $description = 'Gera o backup diário do banco de dados e dos uploads.';
 
+    /**
+     * Diretório do backup desta execução — nunca é tocado pela poda.
+     */
+    private ?string $diretorioDaExecucao = null;
+
     public function __construct(
         private DatabaseDumper $dumper,
         private FileArchiver $arquivador,
@@ -33,11 +38,12 @@ class Backup extends Command
 
     public function handle(): int
     {
-        // Valida a retenção ANTES de criar qualquer diretório.
+        // Valida a retenção ANTES de criar qualquer diretório. Zero é recusado:
+        // "manter nada" apagaria o backup que esta execução acabou de criar.
         $retencaoDias = (int) ($this->option('retention-days') ?? config('escola.backup.retencao_dias'));
 
-        if ($retencaoDias < 0) {
-            $this->error('A retenção em dias não pode ser negativa.');
+        if ($retencaoDias < 1) {
+            $this->error('A retenção em dias precisa ser pelo menos 1 (recebido: '.$retencaoDias.').');
 
             return self::FAILURE;
         }
@@ -54,6 +60,7 @@ class Backup extends Command
 
         try {
             $diretorio = $this->criarDiretorio();
+            $this->diretorioDaExecucao = $diretorio;
             $this->dumpDoBanco($diretorio);
             $this->compactar($diretorio.'/database.sql', $diretorio.'/database.sql.gz');
             $this->arquivarUploads($diretorio);
@@ -229,6 +236,13 @@ class Backup extends Command
 
         foreach (File::directories($base) as $diretorio) {
             $nome = basename($diretorio);
+
+            // A poda nunca toca no backup desta execução: mesmo com relógio
+            // adiantado/atrasado entre a criação e a poda, o backup do dia é
+            // intocável.
+            if ($diretorio === $this->diretorioDaExecucao) {
+                continue;
+            }
 
             if (! preg_match('/^backup-(\d{4})-(\d{2})-(\d{2})_(\d{6})$/', $nome, $m)) {
                 $ignorados++;
