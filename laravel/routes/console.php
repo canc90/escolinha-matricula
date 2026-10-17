@@ -13,3 +13,10 @@ Artisan::command('inspire', function () {
 Schedule::call(function () {
     app(RiskEngine::class)->gerarAlertas();
 })->daily()->description('Gera alertas automáticos de frequência');
+
+// Backup diário do banco e dos uploads. Às 02:30 para não colidir com o job de
+// alertas (meia-noite) e rodar fora do horário de uso da escola.
+Schedule::command('escola:backup')
+    ->dailyAt('02:30')
+    ->withoutOverlapping(30)
+    ->description('Backup diário do banco e dos uploads');

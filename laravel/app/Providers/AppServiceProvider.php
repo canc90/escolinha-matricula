@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Contracts\DatabaseDumper;
+use App\Contracts\FileArchiver;
+use App\Services\Backup\MysqldumpDumper;
+use App\Services\Backup\TarArchiver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
@@ -15,7 +19,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(DatabaseDumper::class, function (): MysqldumpDumper {
+            $conexao = (array) config('database.connections.'.config('escola.backup.conexao'));
+
+            return new MysqldumpDumper($conexao, (string) config('escola.backup.binarios.mysqldump'));
+        });
+
+        $this->app->bind(
+            FileArchiver::class,
+            fn (): TarArchiver => new TarArchiver((string) config('escola.backup.binarios.tar')),
+        );
     }
 
     /**

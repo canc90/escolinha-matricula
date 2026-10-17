@@ -18,6 +18,15 @@ services:
       - "8080:80"
     volumes:
       - app-storage:/var/www/html/storage
+      # Backup no host, fora do volume: sem esta montagem os backups do banco e
+      # dos uploads ficariam presos dentro do volume app-storage e nao
+      # apareceriam no host (irrecuperaveis fora do Docker). O diretorio de
+      # origem vem de BACKUP_HOST_PATH (padrao ./backups). O entrypoint roda
+      # `chown -R www-data:www-data storage` como root aqui, ajustando a
+      # permissao para o scheduler (www-data) conseguir escrever.
+      # Comandos manuais neste servico devem usar -u www-data, o mesmo usuario
+      # do scheduler:  docker compose exec -u www-data app php artisan escola:backup
+      - ${BACKUP_HOST_PATH:-./backups}:/var/www/html/storage/app/backups
     depends_on:
       mysql:
         condition: service_healthy
@@ -50,6 +59,9 @@ services:
     command: php artisan schedule:work
     volumes:
       - app-storage:/var/www/html/storage
+      # Mesmo destino de backup do servico `app` (bind mount do host): e aqui que
+      # o backup diario das 02:30 roda, como www-data.
+      - ${BACKUP_HOST_PATH:-./backups}:/var/www/html/storage/app/backups
     depends_on:
       app:
         condition: service_healthy

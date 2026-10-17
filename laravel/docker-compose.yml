@@ -4,6 +4,9 @@ services:
     user: "1000:1000"
     working_dir: /var/www/html
     volumes:
+      # O repositorio inteiro fica montado: storage/app/backups ja e visivel no
+      # host, sem configuracao extra. Backup manual:
+      #   docker compose exec app php artisan escola:backup
       - .:/var/www/html
       - ../backend/database:/old-db:ro
       - ../backend/uploads:/old-uploads:ro
