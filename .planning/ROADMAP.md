@@ -57,7 +57,7 @@ Plans:
 
 Plans:
 - [x] 02-01: Logs com rotação diária e retenção de 14 dias (com poda real provada)
-- [ ] 02-02: Alerta de 5xx por webhook (`ALERT_WEBHOOK_URL`) com fallback no canal `alertas`, deduplicação e teto
+- [x] 02-02: Alerta de 5xx por webhook (`ALERT_WEBHOOK_URL`) com fallback no canal `alertas`, deduplicação e teto
 
 ### Phase 3: Endurecimento de Segurança (CSP)
 **Goal**: As páginas entregues ao navegador não carregam nem executam nada que não venha da própria aplicação, sem perder nenhuma funcionalidade existente
