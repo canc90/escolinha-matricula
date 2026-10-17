@@ -9,9 +9,9 @@ Requisitos do release inicial. Cada um mapeia para uma fase do roadmap.
 
 ### Confiabilidade de Dados
 
-- [ ] **BACKUP-01**: O sistema executa backup diário automático do banco MySQL, gravando um dump compactado com retenção configurável
-- [ ] **BACKUP-02**: O backup diário inclui os arquivos enviados (fotos de alunos, documentos e fotos de professoras)
-- [ ] **BACKUP-03**: A restauração de um backup é documentada e coberta por teste automatizado
+- [x] **BACKUP-01**: O sistema executa backup diário automático do banco MySQL, gravando um dump compactado com retenção configurável
+- [x] **BACKUP-02**: O backup diário inclui os arquivos enviados (fotos de alunos, documentos e fotos de professoras)
+- [x] **BACKUP-03**: A restauração de um backup é documentada e coberta por teste automatizado
 
 ### Observabilidade
 
@@ -60,9 +60,9 @@ Quais fases cobrem quais requisitos. Preenchido durante a criação do roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BACKUP-01 | Phase 1 | Pending |
-| BACKUP-02 | Phase 1 | Pending |
-| BACKUP-03 | Phase 1 | Pending |
+| BACKUP-01 | Phase 1 | Complete |
+| BACKUP-02 | Phase 1 | Complete |
+| BACKUP-03 | Phase 1 | Complete |
 | OBS-01 | Phase 2 | Pending |
 | OBS-02 | Phase 2 | Pending |
 | SEC-01 | Phase 3 | Pending |
@@ -79,4 +79,4 @@ Quais fases cobrem quais requisitos. Preenchido durante a criação do roadmap.
 ---
 
 *Requirements defined: 2026-10-16*
-*Last updated: 2026-10-16 after roadmap creation (traceability filled)*
+*Last updated: 2026-10-17 after phase 1 complete (BACKUP-01, BACKUP-02, BACKUP-03 verified)*
