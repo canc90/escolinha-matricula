@@ -53,7 +53,11 @@ Plans:
   2. O espaço em disco ocupado por logs permanece estável ao longo dos dias
   3. Um erro 5xx dispara notificação para um canal configurável (sem edição de código para trocar o canal)
   4. Falha ao entregar a notificação não derruba a requisição do usuário nem gera erro em cascata
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 02-01: Logs com rotação diária e retenção de 14 dias (com poda real provada)
+- [ ] 02-02: Alerta de 5xx por webhook (`ALERT_WEBHOOK_URL`) com fallback no canal `alertas`, deduplicação e teto
 
 ### Phase 3: Endurecimento de Segurança (CSP)
 **Goal**: As páginas entregues ao navegador não carregam nem executam nada que não venha da própria aplicação, sem perder nenhuma funcionalidade existente
