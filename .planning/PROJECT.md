@@ -72,6 +72,8 @@ confiáveis, com relatórios prontos para o dia a dia — **sem depender de plan
 | Sanctum para a API REST | Integração com token sem complexidade de OAuth | ✓ Good |
 | Isolar banco de teste do banco versionado | Impedir que testes poluam dados reais | ✓ Good |
 | Adicionar CI (Node + Laravel + Pint) | Pegar regressões cedo | ✓ Good |
+| Rotação diária como default de código + retenção à prova de zero (Fase 2) | Log único sem limite enche o disco; `max_files=0` desligaria a poda | ✓ Good |
+| Alerta de 5xx pelo status final via `respond()` + webhook por env (Fase 2) | `report()` ignora `HttpException`; trocar de canal sem editar código | ✓ Good |
 
 ---
 *Last updated: 2026-10-16 após a auditoria de produção e ajustes de qualidade.*

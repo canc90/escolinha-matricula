@@ -20,7 +20,7 @@ sistema que a escola usa de fato.
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Backup e Restauração de Dados** - Backups diários do banco e dos uploads, com restauração provada
-- [ ] **Phase 2: Observabilidade Operacional** - Logs rotacionados e alerta automático em erros 5xx
+- [x] **Phase 2: Observabilidade Operacional** - Logs rotacionados e alerta automático em erros 5xx
 - [ ] **Phase 3: Endurecimento de Segurança (CSP)** - Assets self-hosted e Content-Security-Policy restritiva
 - [ ] **Phase 4: Qualidade Automatizada com Análise Estática** - larastan/phpstan como gate no CI
 - [ ] **Phase 5: Higiene do Repositório (Retirada do Legado)** - Node/Express arquivado, CI sem Jest

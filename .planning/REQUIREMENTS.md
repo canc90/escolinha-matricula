@@ -15,8 +15,8 @@ Requisitos do release inicial. Cada um mapeia para uma fase do roadmap.
 
 ### Observabilidade
 
-- [ ] **OBS-01**: Os logs da aplicação rotacionam diariamente com retenção definida, sem crescimento indefinido de disco
-- [ ] **OBS-02**: Erros 5xx disparam notificação para um canal configurável
+- [x] **OBS-01**: Os logs da aplicação rotacionam diariamente com retenção definida, sem crescimento indefinido de disco
+- [x] **OBS-02**: Erros 5xx disparam notificação para um canal configurável
 
 ### Segurança
 
@@ -63,8 +63,8 @@ Quais fases cobrem quais requisitos. Preenchido durante a criação do roadmap.
 | BACKUP-01 | Phase 1 | Complete |
 | BACKUP-02 | Phase 1 | Complete |
 | BACKUP-03 | Phase 1 | Complete |
-| OBS-01 | Phase 2 | Pending |
-| OBS-02 | Phase 2 | Pending |
+| OBS-01 | Phase 2 | Covered (02-01, verificação `passed`) |
+| OBS-02 | Phase 2 | Covered (02-02, verificação `passed`) |
 | SEC-01 | Phase 3 | Pending |
 | QUAL-01 | Phase 4 | Pending |
 | QUAL-02 | Phase 4 | Pending |
