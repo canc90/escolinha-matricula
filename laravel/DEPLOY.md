@@ -17,6 +17,8 @@ MySQL **sem porta exposta** e serviços separados de **fila** e **agendador**.
 
 Os três serviços de aplicação compartilham o volume `app-storage` (`storage/`), para que
 uploads, sessões, cache e logs sejam os mesmos. O banco usa o volume `mysql-data`.
+Exceção: `storage/app/backups` é uma **montagem do host** (`BACKUP_HOST_PATH`), fora do
+volume, para que as cópias não fiquem presas dentro do Docker — veja a seção Backup.
 
 ## Passo a passo
 
@@ -115,8 +117,122 @@ Como `opcache.validate_timestamps=0`, o código só é recarregado após recriar
 
 ## Backup
 
-- **Banco**: `docker compose ... exec mysql mysqldump -u root -p"$DB_ROOT_PASSWORD" escola > backup.sql`
-- **Uploads/anexos**: volume `app-storage` (conteúdo em `storage/app/public`).
+O backup é gerado pelo comando `escola:backup`, que cria um diretório
+`backup-AAAA-MM-DD_HHMMSS/` com:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `database.sql.gz` | dump completo do MySQL, compactado |
+| `uploads.tar.gz` | fotos e documentos de `storage/app/public` |
+| `manifest.json` | tamanho e sha256 de cada artefato (é o marcador de backup íntegro) |
+
+### Onde os backups ficam
+
+- **Em desenvolvimento**, o repositório inteiro é montado em `/var/www/html`, então
+  `storage/app/backups` já aparece no host — não há nada a configurar.
+- **Em produção**, o caminho é o diretório do host definido por `BACKUP_HOST_PATH`
+  (`./backups` por padrão), montado em `/var/www/html/storage/app/backups` nos serviços
+  `app` e `scheduler`. Recomendamos apontá-lo para um diretório **fora da árvore do projeto**:
+
+  ```bash
+  BACKUP_HOST_PATH=/srv/escola-backups docker compose -p escola-prod \
+      --env-file .env.production -f docker-compose.prod.yml up -d
+  ```
+
+Sem essa montagem, o backup ficaria **preso dentro do volume `app-storage`** (um volume do
+Docker, invisível para o host) e não poderia ser copiado para outro lugar — ou seja, não
+seria recuperável. A variável `BACKUP_PATH` no `.env.production` precisa apontar para o
+mesmo caminho de dentro do container (`/var/www/html/storage/app/backups`).
+
+### Comandos manuais rodam como `www-data`
+
+Use `-u www-data` em **todos** os comandos manuais de backup e restauração:
+
+```bash
+P="docker compose -p escola-prod --env-file .env.production -f docker-compose.prod.yml"
+
+$P exec -u www-data app php artisan escola:backup
+```
+
+O serviço `app` sobe como **root** (não declara `user:`) e o `scheduler` roda como
+`www-data`. Um backup executado como root cria diretórios `root:root` no volume do host,
+que o `scheduler` não consegue podar nem sobrescrever: os backups passam a se acumular sem
+retenção e o backup diário falha. Rodando como `www-data`, o dono é o mesmo do `scheduler`
+e da `queue`.
+
+### Rotina diária
+
+- `escola:backup` roda **às 02:30** (America/Sao_Paulo) pelo serviço `scheduler`.
+- A retenção é `BACKUP_RETENTION_DAYS` (**14 dias** por padrão) e pode ser sobrescrita em
+  uma execução com `--retention-days=N`.
+- A retenção é tolerante: um diretório antigo que não pode ser removido gera aviso e é
+  contado como órfão, sem derrubar o backup do dia. Diretórios com nome fora do padrão (ou
+  com data impossível) nunca são apagados.
+- Uma falha em qualquer etapa **não** apaga o backup da própria execução quando o
+  `manifest.json` já foi escrito.
+
+### Verificação manual
+
+```bash
+$P exec -u www-data app php artisan escola:backup
+
+# Confira o diretório mais recente
+$P exec -u www-data app sh -c 'cd storage/app/backups && ls -1 | tail -1'
+$P exec -u www-data app sh -c 'd=$(ls -1d storage/app/backups/backup-* | tail -1); \
+    gzip -t "$d/database.sql.gz" && tar -tzf "$d/uploads.tar.gz" >/dev/null && \
+    sha256sum "$d/database.sql.gz" "$d/uploads.tar.gz" && cat "$d/manifest.json"'
+```
+
+### Restauração
+
+A restauração **sobrescreve** o banco e os uploads. Em produção `--force` é obrigatório, e
+o comando sem argumentos usa o backup mais recente.
+
+```bash
+# 1. Coloque a aplicação em manutenção
+$P exec -u www-data app php artisan down
+
+# 2. Valide o backup SEM escrever nada (mostra o plano e compara ambiente/banco)
+$P exec -u www-data app php artisan escola:restore-backup --dry-run
+
+# 3. Restaure (o backup mais recente, ou aponte outro com --file=<diretório>)
+$P exec -u www-data app php artisan escola:restore-backup --force
+# $P exec -u www-data app php artisan escola:restore-backup --force --file=backup-2026-10-01_023000
+
+# 4. Suba de novo
+$P exec -u www-data app php artisan up
+```
+
+Confirme depois que o login funciona, que existe aluno/professora no sistema e que as fotos
+aparecem nas telas.
+
+O comando **recusa** restaurar quando o `ambiente` ou o `banco` gravado no manifesto é
+diferente do destino — restaurar um dump de homologação em produção é exatamente o acidente
+que essa guarda evita. `--force` confirma a exceção de forma explícita. Ele também recusa
+backup sem `manifest.json`, com sha256 divergente, com formato de manifesto desconhecido ou
+com arquivos de uploads contendo caminhos suspeitos.
+
+**Uploads são restaurados de forma aditiva**: o `tar` sobrescreve os arquivos que existem no
+backup, mas **não remove** do disco `public` os arquivos criados depois dele. Quando isso
+importar (foto ou documento corrompido, ou arquivo que não deveria estar lá), confira com
+`--dry-run`, limpe ou mova manualmente o conteúdo de `storage/app/public` antes de restaurar
+e tenha em mente que não existe remoção automática — é a opção segura por padrão, porque
+apagar por engano não tem volta.
+
+Depois de uma restauração, o cache e os locks são limpos automaticamente (o dump traz o
+estado do momento em que foi gerado, inclusive o lock do próprio backup).
+
+### Dados sensíveis
+
+Dumps e arquivos de uploads contêm dados pessoais de alunos e professoras. Restrinja a
+permissão do diretório de backup e **não** versione esses arquivos (o projeto já ignora
+`storage/app/backups` e `backups/`).
+
+### O que ainda não existe
+
+A cópia **off-site** (BACKUP-04, para um release futuro). Hoje o backup protege contra falha
+da aplicação e corrupção de dados, mas não contra a perda do servidor: enquanto não houver
+cópia externa, replique o diretório de backup para outro lugar periodicamente.
 
 ## Limitações conhecidas
 

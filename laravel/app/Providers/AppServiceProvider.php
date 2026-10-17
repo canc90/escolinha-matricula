@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Contracts\DatabaseDumper;
+use App\Contracts\DatabaseRestorer;
 use App\Contracts\FileArchiver;
+use App\Services\Backup\MysqlClientRestorer;
 use App\Services\Backup\MysqldumpDumper;
 use App\Services\Backup\TarArchiver;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -29,6 +31,12 @@ class AppServiceProvider extends ServiceProvider
             FileArchiver::class,
             fn (): TarArchiver => new TarArchiver((string) config('escola.backup.binarios.tar')),
         );
+
+        $this->app->bind(DatabaseRestorer::class, function (): MysqlClientRestorer {
+            $conexao = (array) config('database.connections.'.config('escola.backup.conexao'));
+
+            return new MysqlClientRestorer($conexao, (string) config('escola.backup.binarios.mysql'));
+        });
     }
 
     /**
