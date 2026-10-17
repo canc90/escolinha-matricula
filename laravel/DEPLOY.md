@@ -291,6 +291,46 @@ $P exec -u www-data app sh -c 'rm -f storage/logs/laravel-*.log storage/logs/ale
 de 14 dias limita a janela de exposição, os arquivos não são versionados (`*.log` no
 `.gitignore`) e o diretório não é servido pelo servidor web.
 
+### Alertas de erro 5xx
+
+Todo erro **5xx** (500, 502, 503...) dispara a notificação do `NotificadorDeErros`, capturada
+pelo **status final** da resposta — por isso um `abort(503)` também alerta, e 404/401/403/419
+e erro de validação (422) **não** disparam nada. O alerta é um POST JSON com status, classe,
+mensagem, arquivo/linha, método, rota e timestamp (sem headers, query string nem stack trace:
+o objetivo é avisar, não vazar dados).
+
+**Canal.** Configure `ALERT_WEBHOOK_URL` no `.env.production` com um webhook de n8n, Slack,
+Discord etc. Trocar o canal é trocar o `.env` e recriar o container (`$P up -d`) — **nenhuma
+edição de código**. Para conferir: `$P exec app php artisan config:show escola` (bloco
+`alertas`). A URL é lida no boot; com config em cache, rode `optimize:clear` antes.
+
+**Comportamento.**
+
+- **Sem URL configurada** (estado legítimo): o alerta é registrado no canal de log `alertas`
+  (`storage/logs/alertas-*.log`) — nada fica em silêncio.
+- **Webhook fora do ar ou devolvendo erro**: a falha é registrada no mesmo canal (apenas
+  esquema/host/porta, nunca a URL completa, que pode conter token) e **a requisição do usuário
+  segue respondendo normalmente** — a entrega do alerta nunca pode quebrar o pipeline.
+- **Deduplicação**: o MESMO erro (status + classe + rota) alerta **uma vez** dentro de
+  `ALERT_DEDUP_MINUTES` (10 min por padrão); a repetição aparece como breadcrumb `warning` no
+  log padrão (`suprimido por deduplicacao`).
+- **Teto global**: no máximo `ALERT_MAX_PER_HOUR` (30 por padrão) alertas distintos por hora;
+  o excedente vai para o canal `alertas` em vez de virar enxurrada no webhook.
+- **Timeouts**: `ALERT_WEBHOOK_TIMEOUT` (5 s) e `ALERT_WEBHOOK_CONNECT_TIMEOUT` (2 s) impedem
+  que um webhook sem resposta prenda o worker do `app`, `queue` ou `scheduler`.
+
+**Como testar manualmente** (dispara um erro de verdade e observa a saída):
+
+```sh
+# Em dev, com um receptor local: ALERT_WEBHOOK_URL apontando para um endpoint de teste
+docker compose exec app php artisan config:show escola
+# Log em produção deve trazer o POST em warning:
+$P exec -u www-data app sh -c 'tail -n 50 storage/logs/alertas-*.log'
+```
+
+**Dados sensíveis.** O payload NÃO inclui headers, corpo/query da requisição nem stack trace
+— contém apenas status, classe, mensagem (truncada), arquivo/linha, rota e timestamp.
+
 ## Limitações conhecidas
 
 - Sem Content-Security-Policy: a interface usa CDNs e estilos/scripts inline; uma CSP
