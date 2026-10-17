@@ -6,6 +6,7 @@ use App\Services\Observabilidade\NotificadorDeErros;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Request as RequisicaoHttp;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -375,12 +376,21 @@ class AlertaErroServidorTest extends TestCase
         $this->assertSame(7, $opcoes['timeout'], 'O timeout TOTAL precisa vir do config.');
         $this->assertSame(3, $opcoes['connect_timeout'], 'O timeout de CONEXÃO precisa vir do config.');
 
+        // Mudar o config SEM remontar o PendingRequest deixaria a asserção
+        // comparar valor velho com config novo (tautologia): uma SEGUNDA
+        // notificação com assinatura diferente (status + rota) força o
+        // notificador a montar a requisição de novo, já com o config trocado.
         config(['escola.alertas.webhook_timeout' => 9]);
 
-        $this->assertNotSame(
-            $opcoes['timeout'],
-            (int) config('escola.alertas.webhook_timeout'),
-            'O timeout precisa acompanhar o config (não pode ser constante decorativa).',
-        );
+        $sonda->notificar(new RuntimeException('sonda de timeout'), Request::create('/_sonda/timeout/remarcada'), 502);
+
+        $this->assertNotSame($opcoes, $sonda->pendente, 'A segunda notificação precisa remontar a requisição.');
+
+        $opcoesNovas = \Closure::bind(function (): array {
+            return $this->options;
+        }, $sonda->pendente, PendingRequest::class)();
+
+        $this->assertSame(9, $opcoesNovas['timeout'], 'O timeout precisa RE-LER o config a cada notificação.');
+        $this->assertSame(3, $opcoesNovas['connect_timeout'], 'O timeout de conexão continua vindo do config.');
     }
 }

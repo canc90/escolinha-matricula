@@ -322,9 +322,16 @@ edição de código**. Para conferir: `$P exec app php artisan config:show escol
 **Como testar manualmente** (dispara um erro de verdade e observa a saída):
 
 ```sh
-# Em dev, com um receptor local: ALERT_WEBHOOK_URL apontando para um endpoint de teste
-docker compose exec app php artisan config:show escola
-# Log em produção deve trazer o POST em warning:
+# Receptor local (dev): um endpoint que grava o POST e responde 200
+docker compose exec app sh -c 'printf "%s\n" "<?php file_put_contents(\"/tmp/recebido.json\", file_get_contents(\"php://input\")); http_response_code(200);" > /tmp/recv.php; php -S 127.0.0.1:9977 /tmp/recv.php &'
+export ALERT_WEBHOOK_URL=http://127.0.0.1:9977/eco
+docker compose exec app php artisan config:show escola   # o canal precisa refletir o .env
+# A seguir, provoque um 5xx (ou aguarde um erro real) e confira:
+docker compose exec app sh -c 'head -c 600 /tmp/recebido.json'
+```
+
+```sh
+# Em produção, sem receptor: o webhook está fora do ar? confira o fallback
 $P exec -u www-data app sh -c 'tail -n 50 storage/logs/alertas-*.log'
 ```
 
